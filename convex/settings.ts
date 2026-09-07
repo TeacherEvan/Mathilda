@@ -1,6 +1,11 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 
+// Get the persisted settings snapshot for a user (single-row).
+// Called by C# via POST {DEPLOY_URL}/api/query
+// body { "path": "settings/get", "args": { userId }, "format": "json" }.
+// Fields match the C# AppSettings model (src/Mathilda/Models/AppSettings.cs):
+// skipStartupVideo, showInstallPrompt, customConvexUrl.
 export const get = query({
   args: { userId: v.string() },
   handler: async (ctx, args) => {
@@ -11,19 +16,17 @@ export const get = query({
   },
 });
 
+// Persist the three settings C# actually uses (AppSettings.cs).
+// All other fields previously declared (lang, theme, currency, units,
+// highAccuracyGps, mockLocationEnabled, mockCoordinates, enableDebugTelemetry)
+// were stripped in OBJ-08 because no UI binds them and no C# code calls
+// this endpoint yet. Grow back when a real C# -> Convex settings sync lands.
 export const save = mutation({
   args: {
     userId: v.string(),
-    lang: v.optional(v.string()),
-    theme: v.optional(v.string()),
-    currency: v.optional(v.string()),
-    units: v.optional(v.string()),
-    highAccuracyGps: v.optional(v.boolean()),
     skipStartupVideo: v.optional(v.boolean()),
     showInstallPrompt: v.optional(v.boolean()),
-    mockLocationEnabled: v.optional(v.boolean()),
-    mockCoordinates: v.optional(v.string()),
-    enableDebugTelemetry: v.optional(v.boolean()),
+    customConvexUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const existing = await ctx.db
@@ -32,31 +35,17 @@ export const save = mutation({
       .first();
     if (existing) {
       await ctx.db.patch(existing._id, {
-        lang: args.lang,
-        theme: args.theme,
-        currency: args.currency,
-        units: args.units,
-        highAccuracyGps: args.highAccuracyGps,
         skipStartupVideo: args.skipStartupVideo,
         showInstallPrompt: args.showInstallPrompt,
-        mockLocationEnabled: args.mockLocationEnabled,
-        mockCoordinates: args.mockCoordinates,
-        enableDebugTelemetry: args.enableDebugTelemetry,
+        customConvexUrl: args.customConvexUrl,
       });
       return existing._id;
     }
     return await ctx.db.insert("settings", {
       userId: args.userId,
-      lang: args.lang,
-      theme: args.theme,
-      currency: args.currency,
-      units: args.units,
-      highAccuracyGps: args.highAccuracyGps,
       skipStartupVideo: args.skipStartupVideo,
       showInstallPrompt: args.showInstallPrompt,
-      mockLocationEnabled: args.mockLocationEnabled,
-      mockCoordinates: args.mockCoordinates,
-      enableDebugTelemetry: args.enableDebugTelemetry,
+      customConvexUrl: args.customConvexUrl,
     });
   },
 });

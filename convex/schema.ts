@@ -11,15 +11,8 @@ export default defineSchema({
   }),
   settings: defineTable({
     userId: v.string(),
-    lang: v.optional(v.string()),
-    theme: v.optional(v.string()),
-    currency: v.optional(v.string()),
-    units: v.optional(v.string()),
-    highAccuracyGps: v.optional(v.boolean()),
     skipStartupVideo: v.optional(v.boolean()),
     showInstallPrompt: v.optional(v.boolean()),
-    mockLocationEnabled: v.optional(v.boolean()),
-    mockCoordinates: v.optional(v.string()),
-    enableDebugTelemetry: v.optional(v.boolean()),
+    customConvexUrl: v.optional(v.string()),
   }),
 });
