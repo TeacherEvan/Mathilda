@@ -8,11 +8,6 @@
         <img class="startup-fallback" src="media/startup-intro.svg" alt="Mathilda" />
 
         <button class="btn btn-ghost skip-btn" @onclick="MarkComplete" aria-label="Skip intro">Skip Intro ✕</button>
-
-        @if (_loading)
-        {
-            <div class="loading-spinner" aria-live="polite">Loading…</div>
-        }
     </div>
 }
 
@@ -21,7 +16,6 @@
     public EventCallback OnComplete { get; set; }
 
     private bool _completed;
-    private bool _loading = true;
 
     protected override async Task OnInitializedAsync()
     {
@@ -34,8 +28,6 @@
         {
             settings = new AppSettings();
         }
-
-        _loading = false;
 
         if (settings.SkipStartupVideo)
         {

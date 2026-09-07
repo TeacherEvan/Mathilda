@@ -1,7 +1,10 @@
 using System.Text.Json;
+using Bunit;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
 using Microsoft.JSInterop.Infrastructure;
 using Moq;
+using Mathilda.Components;
 using Mathilda.Models;
 using Mathilda.Services;
 using Xunit;
@@ -13,8 +16,15 @@ namespace Mathilda.Tests.Services;
 /// These guard against the contract drift that previously left features silently broken:
 /// geolocation returning a string instead of {lat,lng}, storage.clear being undefined, and
 /// sw.update being undefined.
+///
+/// F2 (REVIEW-FINDINGS-2026-09-07): the prior StorageClear / ServiceWorkerUpdate tests
+/// asserted only that the mocked IJSRuntime fired a Setup callback - they bypassed the
+/// production component path and would still pass if PrivacySettingsTab.ClearCacheAsync
+/// or AdvancedSettingsPanel.ForceReloadSwAsync were removed. These versions render the
+/// real Razor components via bUnit and click the actual button to drive the JS call,
+/// so a break in the production code path makes them fail.
 /// </summary>
-public class InteropContractTests
+public class InteropContractTests : TestContext
 {
     private readonly Mock<IJSRuntime> _jsMock;
     private readonly LocalStore _store;
@@ -25,21 +35,29 @@ public class InteropContractTests
         _jsMock = new Mock<IJSRuntime>();
         _store = new LocalStore(_jsMock.Object);
         _install = new InstallPromptService(_jsMock.Object, new AppSettingsService(_store));
+
+        // Pre-stage the mathilda.storage.getItem call so PrivacyConsentService.LoadAsync
+        // returns a fresh PrivacyConsent (null -> new() fallback) instead of throwing.
+        _jsMock.Setup(x => x.InvokeAsync<string?>("mathilda.storage.getItem", It.IsAny<object[]>()))
+            .ReturnsAsync((string?)null);
+
+        Services.AddSingleton<IJSRuntime>(_jsMock.Object);
+        Services.AddSingleton(_store);
+        Services.AddSingleton(_install);
+        Services.AddSingleton(new AppSettingsService(_store));
+        Services.AddSingleton(new PrivacyConsentService(_store));
     }
 
     [Fact]
     public async Task LocationService_RequestGpsAsync_ParsesLatLngObject()
     {
-        // Arrange — interop returns { lat, lng } (the corrected contract, not "lat,lng").
         _jsMock.Setup(x => x.InvokeAsync<JsonElement>("mathilda.geolocation.request", It.IsAny<object[]>()))
             .ReturnsAsync(JsonSerializer.Deserialize<JsonElement>("{\"lat\":13.7563,\"lng\":100.5018}"));
 
         var svc = new LocationService(_jsMock.Object, _store);
 
-        // Act
         var coords = await svc.RequestGpsAsync();
 
-        // Assert
         Assert.True(coords.HasValue);
         Assert.Equal(13.7563, coords!.Value.Lat, 4);
         Assert.Equal(100.5018, coords!.Value.Lng, 4);
@@ -59,56 +77,56 @@ public class InteropContractTests
     }
 
     [Fact]
-    public async Task StorageClear_IsInvokedAndScoped()
+    public async Task PrivacySettingsTab_ClearCacheButton_InvokesStorageClear()
     {
-        // Arrange — the clear call must target the defined mathilda.storage.clear symbol.
-        // InvokeVoidAsync resolves through InvokeAsync<IJSVoidResult>; match that.
-        var cleared = false;
         _jsMock.Setup(x => x.InvokeAsync<IJSVoidResult>("mathilda.storage.clear", It.IsAny<object[]>()))
-            .Callback(() => cleared = true)
             .ReturnsAsync(Mock.Of<IJSVoidResult>());
 
-        // Act — mirror PrivacySettingsTab.ClearCacheAsync
-        await _jsMock.Object.InvokeVoidAsync("mathilda.storage.clear");
+        var cut = RenderComponent<PrivacySettingsTab>();
+        var buttons = cut.FindAll("button");
+        var clearButton = buttons.First(b => b.TextContent.Contains("Clear Offline Cache"));
+        clearButton.Click();
 
-        // Assert
-        Assert.True(cleared);
+        cut.WaitForState(() => cut.Markup.Contains("Cache cleared") || cut.Markup.Contains("Failed"));
+
+        _jsMock.Verify(
+            x => x.InvokeAsync<IJSVoidResult>("mathilda.storage.clear", It.IsAny<object[]>()),
+            Times.AtLeastOnce);
+        Assert.Contains("Cache cleared", cut.Markup);
     }
 
     [Fact]
-    public async Task ServiceWorkerUpdate_IsInvoked()
+    public async Task AdvancedSettingsPanel_ForceReloadSwButton_InvokesSwUpdate()
     {
-        // Arrange — the update call must target the defined mathilda.sw.update symbol.
-        var updated = false;
         _jsMock.Setup(x => x.InvokeAsync<JsonElement>("mathilda.sw.update", It.IsAny<object[]>()))
-            .Callback(() => updated = true)
             .ReturnsAsync(JsonSerializer.Deserialize<JsonElement>("{\"success\":true}"));
 
-        // Act — mirror AdvancedSettingsPanel.ForceReloadSwAsync
-        var result = await _jsMock.Object.InvokeAsync<JsonElement>("mathilda.sw.update");
+        var cut = RenderComponent<AdvancedSettingsPanel>();
+        var buttons = cut.FindAll("button");
+        var swButton = buttons.First(b => b.TextContent.Contains("Force Service Worker Reload"));
+        swButton.Click();
 
-        // Assert
-        Assert.True(updated);
-        Assert.True(result.GetProperty("success").GetBoolean());
+        cut.WaitForState(() => cut.Markup.Contains("Service worker update triggered") || cut.Markup.Contains("Failed"));
+
+        _jsMock.Verify(
+            x => x.InvokeAsync<JsonElement>("mathilda.sw.update", It.IsAny<object[]>()),
+            Times.AtLeastOnce);
+        Assert.Contains("Service worker update triggered", cut.Markup);
     }
 
     [Fact]
     public async Task InstallPromptService_Initialize_RegistersTypedCallback_NoEval()
     {
-        // Arrange
         _jsMock.Setup(x => x.InvokeAsync<JsonElement>("mathilda.pwa.getPlatformInfo", It.IsAny<object[]>()))
             .ReturnsAsync(JsonSerializer.Deserialize<JsonElement>("{\"platform\":\"DesktopChromium\",\"isStandalone\":false,\"canInstall\":true,\"userAgent\":\"test\"}"));
 
-        // Capture the registration call to confirm it is the typed bridge, not eval.
         string? registeredSymbol = null;
         _jsMock.Setup(x => x.InvokeAsync<object?>("mathilda.pwa.registerCallbacks", It.IsAny<object[]>()))
             .Callback<string, object[]>((sym, args) => registeredSymbol = sym)
             .ReturnsAsync(true);
 
-        // Act
         await _install.InitializeAsync();
 
-        // Assert — callback registered via the typed symbol, not via eval.
         Assert.Equal("mathilda.pwa.registerCallbacks", registeredSymbol);
         Assert.True(_install.CanShowInstallPrompt);
     }
