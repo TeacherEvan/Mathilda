@@ -54,6 +54,6 @@ else
             _locationName = l.Name;
         }
         _convexConnected = Places.IsConvexConnected();
-        _attractions = await Places.FetchNearby(10);
+        _attractions = await Places.FetchNearby(10, _lat, _lng);
     }
 }

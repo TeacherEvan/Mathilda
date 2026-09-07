@@ -10,7 +10,7 @@ public sealed class PlacesService
 
     public PlacesService(ConvexClient? convex = null) => _convex = convex;
 
-    public async Task<IReadOnlyList<Attraction>> FetchNearby(double radiusKm)
+    public async Task<IReadOnlyList<Attraction>> FetchNearby(double radiusKm, double lat, double lng)
     {
         if (_convex is null)
         {
@@ -22,7 +22,13 @@ public sealed class PlacesService
             };
         }
 
-        var rows = await _convex.QueryAsync<List<Attraction>>("places/list");
+        // Live path: pass the radius + the user's current coordinates so the
+        // Convex backend can apply a haversine filter. Previously the args
+        // were silently dropped, which made the UI's "within N km" headline
+        // a lie on live data (F1 in REVIEW-FINDINGS-2026-09-07.md).
+        var rows = await _convex.QueryAsync<List<Attraction>>(
+            "places/list",
+            new { radiusKm, lat, lng });
         return rows ?? new List<Attraction>();
     }
 
