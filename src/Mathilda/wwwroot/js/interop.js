@@ -140,16 +140,6 @@ window.mathilda.storage.setItem = function (key, value) {
     }
 };
 
-window.mathilda.storage.removeItem = function (key) {
-    try {
-        localStorage.removeItem(key);
-        return true;
-    } catch (e) {
-        console.warn('[Storage] removeItem failed:', e);
-        return false;
-    }
-};
-
 window.mathilda.storage.clear = function () {
     try {
         MATHILDA_STORAGE_KEYS.forEach(k => localStorage.removeItem(k));
