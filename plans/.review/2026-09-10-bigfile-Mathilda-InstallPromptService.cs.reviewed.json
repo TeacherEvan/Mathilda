@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-10-bigfile-Mathilda-InstallPromptService.cs.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**Language mismatch**: The target is a C# file (`.cs`) but the plan applies TypeScript tooling (`knip`, `ts-prune`, `index.ts` barrels, `import`/`export` cross-refs). C# has no concept of these; the structural analysis and objectives are built on a wrong assumption.",
+    "**Filler objectives**: OBJ-003\u2013OBJ-012 are ten identical \"Hardening pass N\" entries with zero differentiation, directly contradicting the header claim that objectives are \"derived from structural analysis \u2026 NOT a generic N-slice filler.\"",
+    "**No extraction plan**: The plan repeatedly references \"post-extraction\" and claims the file will \"disappear (split into smaller modules) or shrink materially,\" but never specifies what is extracted, into which modules, or how. The DoD is unachievable without an actual extraction blueprint."
+  ],
+  "reviewed_at": "2026-09-10T14:36:39.382928+07:00"
+}

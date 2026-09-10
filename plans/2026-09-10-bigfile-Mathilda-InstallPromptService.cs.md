@@ -129,3 +129,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-10T14:36:39.382242+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **Language mismatch**: The target is a C# file (`.cs`) but the plan applies TypeScript tooling (`knip`, `ts-prune`, `index.ts` barrels, `import`/`export` cross-refs). C# has no concept of these; the structural analysis and objectives are built on a wrong assumption.
+2. **Filler objectives**: OBJ-003–OBJ-012 are ten identical "Hardening pass N" entries with zero differentiation, directly contradicting the header claim that objectives are "derived from structural analysis … NOT a generic N-slice filler."
+3. **No extraction plan**: The plan repeatedly references "post-extraction" and claims the file will "disappear (split into smaller modules) or shrink materially," but never specifies what is extracted, into which modules, or how. The DoD is unachievable without an actual extraction blueprint.
