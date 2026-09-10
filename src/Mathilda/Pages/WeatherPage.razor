@@ -5,7 +5,7 @@
 @inject LocationService Location
 
 <h1>Weather</h1>
-<p>Current conditions for @_locationName (@_lat.ToString("0.00"), @_lng.ToString("0.00")) — @(_convexConnected ? "live data" : "mock data")</p>
+<p>Current conditions for @_locationName (@_lat.ToString("0.00"), @_lng.ToString("0.00")) — @(_convexConnected ? "server data" : "mock data")</p>
 
 @if (_snapshot is null)
 {
