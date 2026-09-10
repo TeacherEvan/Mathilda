@@ -1,0 +1,12 @@
+{
+  "plan": "2026-09-04-bigfile-Mathilda-InstallPromptService.cs.md",
+  "verdict": "READY-WITH-WARNINGS",
+  "started_at": "2026-09-09T16:16:27.103785+07:00",
+  "duration_s": 0.3,
+  "result": {
+    "returncode": 2,
+    "stdout_tail": "",
+    "stderr_tail": "rt running gateways.\n  Gateways may still be serving pre-update modules (mixed sys.modules).\n  Run `hermes update` or `hermes gateway restart`.\nError: Refusing non-interactive startup because /home/ewaldt/.hermes/config.yaml is invalid: while parsing a block mapping\n  in \"/home/ewaldt/.hermes/config.yaml\", line 8, column 3\ndid not find expected key\n  in \"/home/ewaldt/.hermes/config.yaml\", line 38, column 4. Repair the file or pass --ignore-user-config to intentionally run with built-in defaults."
+  },
+  "completed_at": "2026-09-09T16:16:27.410240+07:00"
+}
