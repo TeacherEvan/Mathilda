@@ -1,0 +1,11 @@
+{
+  "plan": "2026-09-11-bigfile-Mathilda-InstallPromptService.cs.md",
+  "verdict": "NEEDS-REVISION",
+  "ready_for_impl": false,
+  "gaps": [
+    "**No extraction objectives.** The plan claims to split `InstallPromptService.cs` into smaller modules, but zero of the 12 objectives actually extract code, define new modules, or specify what gets split. OBJ-003\u2013OBJ-012 are all identical \"Hardening pass N\" boilerplate targeting the *same* file post-extraction \u2014 there is nothing to extract.",
+    "**Toolchain mismatch.** The target is a C# file (`.cs`), but OBJ-001 calls for `pnpm dlx knip` / `ts-prune` and `rg -n '^import'` \u2014 all TypeScript tooling. These do not apply to C# source. The structural analysis section reports \"(no structural signals detected)\" yet the plan header claims objectives are \"derived from structural analysis.\"",
+    "**No DoD entries, no security/why/imports sections.** The structural check flags `has_header=None has_imports=None has_why=None has_dod=None has_security=None`. The DoD checklist promises entries \"filled in by the IMPLEMENT pass\" but none exist. The plan is a skeleton with filler objectives, not a reviewable refactor plan."
+  ],
+  "reviewed_at": "2026-09-11T18:47:15.662164+07:00"
+}

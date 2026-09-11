@@ -129,3 +129,15 @@ derived from the structural signals above — they name concrete extractions
   its next tick.
 - implementer: `cron_surgical_impl.py` will pick this plan up once the reviewer
   marks it `READY` or `READY-WITH-WARNINGS`.
+
+
+## REVIEW 2026-09-11T18:47:15.661472+07:00
+
+**Verdict:** `NEEDS-REVISION`
+
+**Structural check:** objectives=12 file_header=✓ imports=✓ why=✓ dod=✓ security=✓
+
+**Gaps:**
+1. **No extraction objectives.** The plan claims to split `InstallPromptService.cs` into smaller modules, but zero of the 12 objectives actually extract code, define new modules, or specify what gets split. OBJ-003–OBJ-012 are all identical "Hardening pass N" boilerplate targeting the *same* file post-extraction — there is nothing to extract.
+2. **Toolchain mismatch.** The target is a C# file (`.cs`), but OBJ-001 calls for `pnpm dlx knip` / `ts-prune` and `rg -n '^import'` — all TypeScript tooling. These do not apply to C# source. The structural analysis section reports "(no structural signals detected)" yet the plan header claims objectives are "derived from structural analysis."
+3. **No DoD entries, no security/why/imports sections.** The structural check flags `has_header=None has_imports=None has_why=None has_dod=None has_security=None`. The DoD checklist promises entries "filled in by the IMPLEMENT pass" but none exist. The plan is a skeleton with filler objectives, not a reviewable refactor plan.
