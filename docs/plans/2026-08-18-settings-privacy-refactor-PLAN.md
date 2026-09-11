@@ -221,3 +221,14 @@ unaddressed CRITICAL in code-review. Status assigned by FINAL_AUDIT with evidenc
 *Corrections to prior audit:* interop path is `src/Mathilda/wwwroot/js/interop.js`;
 `AppSettings.Currency` (not `TripCostEntry.Currency`) is the unused field; current build
 is 0-warning/35-test (audit's xUnit1031 may already be resolved — see OBJ-13).
+
+---
+
+## Reconciliation Update (2026-09-11)
+
+Header claims branch `feature/pwa-install-startup-advanced-settings`. Verified:
+working tree is on `main` @ `145787f`; that feature branch's content is merged.
+All 13 objectives (OBJ-01..13) remain implemented and verified (43/43 green,
+`dotnet build` 0W/0E). REVIEW-FINDINGS-2026-09-07 F1/F3/F4 are remediated in tree;
+F2/F5/F6 are deferred (see `docs/.scratch-audit/TRACEABILITY.md`). Banner corrected;
+code state is authoritative.

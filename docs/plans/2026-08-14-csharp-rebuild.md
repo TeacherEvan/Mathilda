@@ -223,3 +223,14 @@ i18n via `.resx` (specced, not built) OR accept as static en/th select (descope)
 Branch `feature/pwa-install-startup-advanced-settings` (commit `83d5162`, built on this plan) extends Mathilda far beyond the original rebuild scope: a full PWA (manifest + service worker + install wizard), themed startup intro, privacy/location onboarding, and an advanced-settings hub. That work is tracked in `docs/plans/archive/2026-08-17-pwa-install-startup-onboarding-advanced-settings.md` (its §0 records verified status: Phases 1–3 + 5 done, 35 tests green, `dotnet publish` Vercel-ready; Phase 4 dashboard overhaul, the real startup video asset, and the `v0.2.0` tag remain open).
 
 **Current truth (verified 2026-08-18):** this rebuild (v0.1.0) is complete; `main` is at `af3e126`, tag `v0.1.0` exists. The feature branch above carries the PWA/startup/privacy/advanced-settings additions and is the active line of work. README.md now reflects both.
+
+---
+
+## Reconciliation Update (2026-09-11)
+
+The "Current truth" block below claims `main` at `af3e126` with tag `v0.1.0` applied.
+Verified against the live tree: `main` is at `145787f`, `git tag -l` is **empty**
+(no `v0.1.0` tag exists), and the PWA/startup feature branch referenced in the
+"Follow-on" section has been merged into `main` (its plan is archived). All Phases
+0–5 remain implemented and tested (43/43 green, `dotnet build` 0W/0E). The banner
+is corrected here; the code state is authoritative.

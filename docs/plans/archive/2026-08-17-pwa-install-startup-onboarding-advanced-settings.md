@@ -495,3 +495,20 @@ Milestone 6: Verification, End-to-End Testing & Release v0.2.0
 
 - [ ] **Task 6.4: Git Commit & Tag**
   - **Details:** Commit changes on feature branch, update documentation in `README.md`, and tag `v0.2.0`.
+
+---
+
+## Archive Correction (2026-09-11)
+
+This archive's header claims `v0.2.0` released + tagged and real `webm`/`mp4` video
+assets present. Both are **stale** — verified against the live tree on `main` @ `145787f`:
+
+- `git tag -l` is **empty**. No `v0.2.0` tag exists.
+- `src/Mathilda/wwwroot/media/` contains **only** `startup-intro.svg`. The `webm`/`mp4`
+  files were removed as orphans in commit `d92411d` (per REVIEW-FINDINGS-2026-09-07 F4).
+- `StartupVideoIntro.razor` renders SVG-only; no `<video>` element.
+
+The plan's Phases 1–3 + 5 (PWA engine, install wizard, startup intro, privacy/location
+onboarding, advanced settings, DI) are genuinely implemented and tested (43/43 green).
+Phase 4 dashboard overhaul and the real video asset are **not** shipped. The header
+banner is corrected here; the code state is authoritative.
